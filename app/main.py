@@ -48,21 +48,21 @@ class CNN(nn.Module):
 
         # First convolutional layer
         # Here we're defining a standard layer with Convolution, BatchNorm, and dropout
-        self.conv1 = nn.Conv2d(3, 32, kernel_size=3, padding=1, stride=2)  # b x 3 x 64 x 64 -> b x 32 x 32 x 32
+        self.conv1 = nn.Conv2d(3, 32, kernel_size=3, padding=1, stride=2)  # b x 3 x 32 x 32 -> b x 32 x 16 x 16
         self.batchnorm1 = nn.BatchNorm2d(32)                               # (channel x height x width), b is batch size
         self.relu1 = nn.ReLU()  # Using ReLU activation function
         self.dropout1 = nn.Dropout(0.1)  # Adding dropout to prevent overfitting
 
         # Second convolutional layer
-        self.conv2 = nn.Conv2d(32, 64, kernel_size=3, padding=1, stride=2)  # b x 32 x 32 x 32 -> b x 64 x 16 x 16
+        self.conv2 = nn.Conv2d(32, 64, kernel_size=3, padding=1, stride=2)  # b x 32 x 16 x 16 -> b x 64 x 8 x 8
         self.batchnorm2 = nn.BatchNorm2d(64)
         self.relu2 = nn.ReLU()
-        self.pool2 = nn.MaxPool2d(2, 2)  # Adding a pooling layer to reduce spatial dimensions, b x 64 x 16 x 16 -> b x 64 x 8 x 8
+        self.pool2 = nn.MaxPool2d(2, 2)  # Adding a pooling layer to reduce spatial dimensions, b x 64 x 8 x 8 -> b x 64 x 4 x 4
         self.dropout2 = nn.Dropout(0.05)
 
         # Third convolutional layer
         # self.conv3 = nn.Conv2d(64, 64, kernel_size=3, padding=1)  # b x 64 x 4 x 4 -> b x 64 x 4 x 4
-        self.conv3 = nn.Conv2d(64, 64, kernel_size=3, padding=1, stride=2)  # b x 64 x 8 x 8 -> b x 64 x 4 x 4
+        self.conv3 = nn.Conv2d(64, 64, kernel_size=3, padding=1, stride=2)  # b x 64 x 4 x 4 -> b x 64 x 4 x 4
         self.batchnorm3 = nn.BatchNorm2d(64)
         self.relu3 = nn.ReLU()
         self.dropout3 = nn.Dropout(0.05)
@@ -134,21 +134,51 @@ def is_alive():
     return status_code
 
 # Predict route
+# @app.route("/predict", methods=["POST"])
+# def predict():
+#     print("/predict request")
+#     req_json = request.get_json()
+#     json_instances = req_json["instances"]
+#     image = Image.open(io.BytesIO(base64.decodebytes(bytes(json_instances[0]["image"], "utf-8")))).convert('RGB')
+#     image_transformed = transform2(image)
+#     model.eval()
+#     outputs = model(image_transformed.unsqueeze(0))
+#     prediction = outputs.argmax(dim=1)
+#     # print(preds_classes)
+
+#     response = jsonify({
+#     "prediction": classes[prediction]
+# })
+#     response.headers["Content-Type"] = "application/json"
+#     return response
+
 @app.route("/predict", methods=["POST"])
 def predict():
     print("/predict request")
-    req_json = request.get_json()
-    json_instances = req_json["instances"]
-    image = Image.open(io.BytesIO(base64.decodebytes(bytes(json_instances[0]["image"], "utf-8")))).convert('RGB')
+
+    # Check if the request contains the "image" field
+    if "image" not in request.files:
+        return Response("No 'image' field found in the form-data.", status=400)
+
+    image_file = request.files["image"]
+
+    if image_file.filename == "":
+        return Response("No file selected.", status=400)
+
+    # Process the image here
+    image = Image.open(image_file.stream).convert('RGB')
     image_transformed = transform2(image)
     model.eval()
     outputs = model(image_transformed.unsqueeze(0))
     prediction = outputs.argmax(dim=1)
-    # print(preds_classes)
 
-    return jsonify({
+    response = jsonify({
         "prediction": classes[prediction]
     })
+    response.headers["Content-Type"] = "application/json"
+    return response
+
+
 
 if __name__ == "__main__":
     app.run(debug=True, host="0.0.0.0", port=8080)
