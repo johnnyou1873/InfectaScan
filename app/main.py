@@ -48,21 +48,21 @@ class CNN(nn.Module):
 
         # First convolutional layer
         # Here we're defining a standard layer with Convolution, BatchNorm, and dropout
-        self.conv1 = nn.Conv2d(3, 32, kernel_size=3, padding=1, stride=2)  # b x 3 x 32 x 32 -> b x 32 x 16 x 16
+        self.conv1 = nn.Conv2d(3, 32, kernel_size=3, padding=1, stride=2)  # b x 3 x 64 x 64 -> b x 32 x 32 x 32
         self.batchnorm1 = nn.BatchNorm2d(32)                               # (channel x height x width), b is batch size
         self.relu1 = nn.ReLU()  # Using ReLU activation function
         self.dropout1 = nn.Dropout(0.1)  # Adding dropout to prevent overfitting
 
         # Second convolutional layer
-        self.conv2 = nn.Conv2d(32, 64, kernel_size=3, padding=1, stride=2)  # b x 32 x 16 x 16 -> b x 64 x 8 x 8
+        self.conv2 = nn.Conv2d(32, 64, kernel_size=3, padding=1, stride=2)  # b x 32 x 32 x 32 -> b x 64 x 16 x 16
         self.batchnorm2 = nn.BatchNorm2d(64)
         self.relu2 = nn.ReLU()
-        self.pool2 = nn.MaxPool2d(2, 2)  # Adding a pooling layer to reduce spatial dimensions, b x 64 x 8 x 8 -> b x 64 x 4 x 4
+        self.pool2 = nn.MaxPool2d(2, 2)  # Adding a pooling layer to reduce spatial dimensions, b x 64 x 16 x 16 -> b x 64 x 8 x 8
         self.dropout2 = nn.Dropout(0.05)
 
         # Third convolutional layer
         # self.conv3 = nn.Conv2d(64, 64, kernel_size=3, padding=1)  # b x 64 x 4 x 4 -> b x 64 x 4 x 4
-        self.conv3 = nn.Conv2d(64, 64, kernel_size=3, padding=1, stride=2)  # b x 64 x 4 x 4 -> b x 64 x 4 x 4
+        self.conv3 = nn.Conv2d(64, 64, kernel_size=3, padding=1, stride=2)  # b x 64 x 8 x 8 -> b x 64 x 4 x 4
         self.batchnorm3 = nn.BatchNorm2d(64)
         self.relu3 = nn.ReLU()
         self.dropout3 = nn.Dropout(0.05)
