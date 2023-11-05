@@ -11,6 +11,8 @@ import torch.nn as nn
 # import torch.nn.functional as F
 
 # from tqdm.notebook import tqdm
+import io, base64
+from PIL import Image
 
 app = Flask(__name__)
 CORS(app)
@@ -108,17 +110,17 @@ class CNN(nn.Module):
 # We are creating an instance of our CNN model, after which we load to model to
 # the device either GPU or CPU
 model = CNN()
-
+model.load_state_dict(torch.load("./model/model.pth"))
 model.to(device)
 
 read_in_array_sources = np.loadtxt("database_sources.txt", dtype="str", delimiter=":")
 classes = read_in_array_sources[:,0]
 
-transform = transforms.Compose([
+transform2 = transforms.Compose([
     transforms.Resize(256),
-    transforms.RandomRotation(30),
-    transforms.RandomCrop(64),
-    transforms.RandomHorizontalFlip(),
+    # transforms.RandomRotation(30),
+    transforms.CenterCrop(64),
+    # transforms.RandomHorizontalFlip(),
     transforms.ToTensor(),
     transforms.Normalize(
         [0.5, 0.5, 0.5], 
@@ -137,13 +139,15 @@ def predict():
     print("/predict request")
     req_json = request.get_json()
     json_instances = req_json["instances"]
-    X_list = [np.array(j["image"], dtype="uint8") for j in json_instances]
-    X_transformed = torch.cat([transform(x).unsqueeze(dim=0) for x in X_list]).to(device)
-    preds = model(X_transformed)
-    preds_classes = [classes[i_max] for i_max in preds.argmax(1).tolist()]
-    print(preds_classes)
+    image = Image.open(io.BytesIO(base64.decodebytes(bytes(json_instances[0]["image"], "utf-8")))).convert('RGB')
+    image_transformed = transform2(image)
+    model.eval()
+    outputs = model(image_transformed.unsqueeze(0))
+    prediction = outputs.argmax(dim=1)
+    # print(preds_classes)
+
     return jsonify({
-        "predictions": preds_classes
+        "prediction": classes[prediction]
     })
 
 if __name__ == "__main__":
