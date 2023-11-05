@@ -8,6 +8,7 @@ InfectaScan uses a Convolutional Neural Network trained on the DIBaS dataset. In
 
 ## References
 
+```
 @article{zielinski2017,
 	title={Deep learning approach to bacterial colony classification},
 	author={Zieli{\'n}ski, Bartosz and Plichta, Anna and Misztal, Krzysztof and Spurek, Przemys{\l}aw and Brzychczy-W{\l}och, Monika and Ocho{\'n}ska, Dorota},
@@ -18,3 +19,4 @@ InfectaScan uses a Convolutional Neural Network trained on the DIBaS dataset. In
 	year={2017},
 	publisher={Public Library of Science San Francisco, CA USA}
 }
+```
